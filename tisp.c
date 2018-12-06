@@ -82,36 +82,25 @@ Atom* call_c_func(Atom* fun){
   Atom* ret_val = NULL;
   switch(fun->c_func_type){
     case F_SZ_SZ:
-      // Check for implicit conversion to string
       {
         const char * parameter;
+        // Check for implicit conversion to string
         if(fun->children[0]->type == NUMBER){
-          char str_num[MAX_ATOM_STR_SIZE] = "1";
-          sprintf(str_num, "%d", fun->children[0]->int32_value);
-          parameter = str_num;
-          fun->c_func_sz_sz(str_num);
+          if(fun->children[0]->sz_value[0] == 0){
+            // Conversion never made
+            sprintf(fun->children[0]->sz_value, "%d", fun->children[0]->int32_value);
+          }
+          parameter = fun->children[0]->sz_value;
         }
         else{
           parameter = fun->children[0]->sz_value;
         }
         const char* ret = fun->c_func_sz_sz(parameter);
         ret_val = allocate_string_atom(ret);
-        /*
-        Atom ret_atom;
-        ret_atom.type = STRING;
-        size_t ret_size;
-        ret_size = strlen(ret);
-        if(ret_size > MAX_ATOM_STR_SIZE - 1){
-          ret_size = MAX_ATOM_STR_SIZE - 1;
-        }
-        memcpy(ret_atom.sz_value, ret, ret_size);
-        ret_atom.sz_value[ret_size + 1] = 0;*/
-
       }
       break;
     default:
       error = RUNTIME_ERR_NOT_IMPLEMENTED;
-      return;
       break;
   }
 

@@ -3,10 +3,9 @@
 #include <stdio.h>
 #include <errno.h>
 #include <ctype.h>
+#include <stdbool.h>
+#include "tisp_atoms.h"
 
-static Atom ATOMS[MAX_TREE_ELEMENTS];
-static Atom* next_atom = ATOMS;
-static size_t available_atoms = MAX_TREE_ELEMENTS;
 
 //static char output_buffer[256];
 //static size_t output_idx = 0;
@@ -58,12 +57,9 @@ void print_ast(Atom* atom, size_t depth){
 }
 #endif
 
-Atom* allocate_atom(const char* atom_start, const char* atom_end, bool is_function){
-  Atom* ret_val = NULL;
-  if(available_atoms){
-    ret_val = next_atom;
-    next_atom++;
-    available_atoms--;
+Atom* parse_atom(const char* atom_start, const char* atom_end, bool is_function){
+  Atom* ret_val = allocate_atom();
+  if(ret_val){
 
     ret_val->last_children_index = -1;
 
@@ -192,7 +188,7 @@ Atom* tisp_interpreter_read_str(const char* str){
 #define TISP_MARK_ATOM_END() \
   reading_atom = false; \
   atom_end   = pc; \
-  Atom* new_atom = allocate_atom(atom_start, atom_end, is_first_on_list); \
+  Atom* new_atom = parse_atom(atom_start, atom_end, is_first_on_list); \
   if(new_atom == NULL){ \
     error |= SYNTAX_ERR_TOO_MUCH_ATOMS; \
   } \
