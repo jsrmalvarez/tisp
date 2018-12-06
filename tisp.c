@@ -107,7 +107,7 @@ Atom* call_c_func(Atom* fun){
   return ret_val;
 }
 
-Atom* eval(Atom* input){
+Atom* tisp_eval(Atom* input){
   
   error = RUNTIME_ERR_NO_ERR;
 
@@ -141,7 +141,7 @@ Atom* eval(Atom* input){
 
       ssize_t n = 0;
       for(; n <= input->last_children_index; n++){
-        Atom* eval_result = eval(input->children[n]);
+        Atom* eval_result = tisp_eval(input->children[n]);
         if(error != RUNTIME_ERR_NO_ERR){
           ret_val = NULL;
           break;

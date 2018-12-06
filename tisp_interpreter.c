@@ -118,7 +118,7 @@ bool process_atom(Atom* new_atom){
     if(is_first_on_list){
 
       Atom* tree_parent = tree_parents[last_tree_parent_index];
-      if(tree_parent != NULL){
+      if(tree_parent != NULL && tree_parent->type == FUNCTION){
         // Not whole root
         // Insert first_on_list node on parent's children list
         tree_parent->last_children_index++;
@@ -144,7 +144,9 @@ bool process_atom(Atom* new_atom){
     else{
       Atom* tree_parent = tree_parents[last_tree_parent_index];
       if(tree_parent == NULL){
-        error |= SYNTAX_ERR_SYNTAX_ERROR;
+        // Literal atom (no parentheses, no function form)
+        //error |= SYNTAX_ERR_SYNTAX_ERROR;
+        tree_parents[last_tree_parent_index] = new_atom;
         return false;
       }
       else{

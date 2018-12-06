@@ -14,7 +14,7 @@ typedef enum{
 
 RuntimeErr tisp_get_error();
 
-Atom* eval(Atom* atom);
+Atom* tisp_eval(Atom* atom);
 
 #endif//_TISP_H_
 

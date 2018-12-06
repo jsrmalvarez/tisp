@@ -56,5 +56,7 @@ Atom* allocate_number_atom(int32_t value);
 Atom* allocate_string_atom(const char *value);
 #define allocate_function_atom() allocate_atom()
 
+void tisp_tostring(Atom* atom, char* str);
+
 
 #endif//_TISP_ATOMS_H_

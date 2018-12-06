@@ -1,5 +1,6 @@
 #include "tisp_atoms.h"
 #include <string.h>
+#include <stdio.h>
 
 static Atom ATOMS[MAX_TREE_ELEMENTS];
 static Atom* next_atom = ATOMS;
@@ -43,4 +44,20 @@ Atom* allocate_string_atom(const char *value){
   }
 
   return atom;
+}
+
+void tisp_tostring(Atom* atom, char* str){
+  printf("\n");
+  switch(atom->type){
+    case STRING:
+      printf("%s", atom->sz_value);
+      break;
+    case NUMBER:
+      printf("%d", atom->int32_value);
+      break;
+    case FUNCTION:
+      printf("<<%s>>", atom->label);
+      break;
+  }
+  printf("\n");
 }
