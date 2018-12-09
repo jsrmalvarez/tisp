@@ -20,34 +20,25 @@ Atom* allocate_atom(){
   return atom;
 }
 
-Atom* allocate_number_atom(int32_t value){
+Atom* allocate_number_atom(){
   Atom* atom = allocate_atom();
   if(atom){
     atom->type = NUMBER;
-    atom->int32_value = value;
   }
 
   return atom;
 }
 
-Atom* allocate_string_atom(const char *value){
+Atom* allocate_string_atom(){
   Atom* atom = allocate_atom();
   if(atom){
     atom->type = STRING;
-    size_t value_size;
-    value_size = strlen(value);
-    if(value_size > MAX_ATOM_STR_SIZE - 1){
-      value_size = MAX_ATOM_STR_SIZE - 1;
-    }
-    memcpy(atom->sz_value, value, value_size);
-    atom->sz_value[value_size + 1] = 0;
   }
 
   return atom;
 }
 
 void tisp_tostring(Atom* atom, char* str){
-  printf("\n");
   switch(atom->type){
     case STRING:
       printf("%s", atom->sz_value);
@@ -59,5 +50,4 @@ void tisp_tostring(Atom* atom, char* str){
       printf("<<%s>>", atom->label);
       break;
   }
-  printf("\n");
 }

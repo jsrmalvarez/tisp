@@ -1,10 +1,14 @@
 #include "tisp_interpreter.h"
 #include <string.h>
-#include <stdio.h>
+#include <stdint.h>
+#include <stddef.h>
 #include <errno.h>
 #include <ctype.h>
-#include <stdbool.h>
 #include "tisp_atoms.h"
+#include "tisp_impl.h"
+#ifdef DEBUG
+#include <stdio.h>
+#endif
 
 
 //static char output_buffer[256];
@@ -97,10 +101,19 @@ Atom* parse_atom(const char* atom_start, const char* atom_end, bool is_function)
           else{
             // strtol returned 0 because no conversion
             // could be performed.
-            ret_val->type = STRING;
-            // Copy string, the size is already checked:
-            memcpy(ret_val->sz_value, atom_start, atom_size);
-            ret_val->sz_value[atom_size] = 0;
+
+            // WILL NOT DO THIS. FUNCTIONS CANNOT BE
+            // PARAMETERS AT THIS MOMENT:
+            // Check if its a function
+            //if(get_f_type(ret_val->label) != F_UNDEFINED){
+            //  ret_val->type = FUNCTION;
+            //}
+            //else{
+              ret_val->type = STRING;
+              // Copy string, the size is already checked:
+              memcpy(ret_val->sz_value, atom_start, atom_size);
+              ret_val->sz_value[atom_size] = 0;
+            //}
           }
         }
       }

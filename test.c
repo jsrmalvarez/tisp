@@ -81,15 +81,17 @@ int main(){
     if(!print_interpreter_error()){
       if(input != NULL){
         // Eval
-        eval(input);
+        Atom* result = tisp_eval(input);
         // Print
         if(!print_runtime_error()){
-          printf("\n");
+          if(result != NULL){
+            char result_str[MAX_ATOM_STR_SIZE];
+            tisp_tostring(result, result_str);
+            printf("%s\n", result_str);
+          }
         }
       }
     }
   }
-
-	printf("\n");
 }
 

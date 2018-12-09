@@ -4,31 +4,6 @@
 #include <stdio.h>
 #include <string.h>
 
-typedef struct{
-  char* f_label;
-  FunctionType f_type;
-  void*(*c_func)(void);
-}F_LUTEntry;
-
-static const F_LUTEntry F_LUT[] = {
-  {"print", F_SZ_SZ, (void*(*)(void))print_impl}
-};
-
-ssize_t last_LUT_index = -1;
-
-FunctionType get_f_type(char* f_label){
-  FunctionType ret_val = F_UNDEFINED;
-  for(size_t n = 0; n < sizeof(F_LUT)/sizeof(F_LUT[0]); n++){
-    if(memcmp(f_label, F_LUT[n].f_label, strlen(F_LUT[n].f_label)) == 0){
-      ret_val = F_LUT[n].f_type;
-      last_LUT_index = n;
-      break;
-    }
-  }
-  return ret_val; 
-}
-
-
 static RuntimeErr error = RUNTIME_ERR_NO_ERR;
 
 RuntimeErr tisp_get_error(){
@@ -39,6 +14,11 @@ void check_param_number(Atom* fun){
   switch(fun->c_func_type){
     case F_SZ_SZ:
       if((fun->last_children_index + 1) != 1){
+        error = RUNTIME_ERR_BAD_ARITY;
+      }
+      break;
+    case F_N_N_N:
+      if((fun->last_children_index + 1) != 2){
         error = RUNTIME_ERR_BAD_ARITY;
       }
       break;
@@ -59,6 +39,16 @@ void check_param_types(Atom* fun){
         break;
       }
     }
+    else if(fun->c_func_type == F_N_N_N){
+      if(n == 0 && param->type != NUMBER){
+        error = RUNTIME_ERR_BAD_PARAMETER_TYPE;
+        break;
+      }
+      if(n == 1 && param->type != NUMBER){
+        error = RUNTIME_ERR_BAD_PARAMETER_TYPE;
+        break;
+      }
+    }
     else{
       error = RUNTIME_ERR_NOT_IMPLEMENTED;
       break;
@@ -69,7 +59,16 @@ void check_param_types(Atom* fun){
 void assign_c_func(Atom* fun){
   switch(fun->c_func_type){
     case F_SZ_SZ:
-      fun->c_func_sz_sz = (const char*(*)(const char*))F_LUT[last_LUT_index].c_func;
+      {
+      ssize_t last_LUT_index = get_last_LUT_index();
+      fun->c_func_sz_sz = (void(*)(const char*,char*,size_t))F_LUT[last_LUT_index].c_func;
+      }
+      break;
+    case F_N_N_N:
+      {
+      ssize_t last_LUT_index = get_last_LUT_index();
+      fun->c_func_n_n_n = (void(*)(int32_t, int32_t, int32_t*))F_LUT[last_LUT_index].c_func;
+      }
       break;
     default:
       error = RUNTIME_ERR_NOT_IMPLEMENTED;
@@ -95,8 +94,16 @@ Atom* call_c_func(Atom* fun){
         else{
           parameter = fun->children[0]->sz_value;
         }
-        const char* ret = fun->c_func_sz_sz(parameter);
-        ret_val = allocate_string_atom(ret);
+        ret_val = allocate_string_atom();
+        fun->c_func_sz_sz(parameter, ret_val->sz_value, sizeof(ret_val->sz_value));
+      }
+      break;
+    case F_N_N_N:
+      {
+        ret_val = allocate_number_atom();
+        fun->c_func_n_n_n(fun->children[0]->int32_value,
+                          fun->children[1]->int32_value,
+                          &ret_val->int32_value);
       }
       break;
     default:
@@ -122,7 +129,6 @@ Atom* tisp_eval(Atom* input){
       if(input->c_func_type == F_UNKNOWN){
         // Never seen this function before.
         // Try to identify the function
-        last_LUT_index = -1;
         input->c_func_type = get_f_type(input->label);
         if(input->c_func_type == F_UNDEFINED){
           error = RUNTIME_ERR_UNKNOWN_FUN;

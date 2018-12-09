@@ -2,7 +2,6 @@
 #define _TISP_ATOMS_H_
 
 #include <stdint.h>
-#include <stdint.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -16,7 +15,8 @@ typedef enum{
 typedef enum{
   F_UNKNOWN,
   F_UNDEFINED,
-  F_SZ_SZ
+  F_SZ_SZ,
+  F_N_N_N
 }FunctionType;
 
 
@@ -36,7 +36,8 @@ typedef struct Atom{
     struct{
       FunctionType c_func_type;
       union{
-        const char*(*c_func_sz_sz)(const char* op1);
+        void(*c_func_sz_sz)(const char* op1, char* ret, size_t ret_size);
+        void(*c_func_n_n_n)(int32_t op1, int32_t op2, int32_t* ret);
         //int32_t(*c_func_2)(int32_t op1, int32_t op2);
         //const char*(*c_func_3)(int32_t op1, int32_t op2);
         //const char*(*c_func_4)(const char* op1, const char* op2);
@@ -52,8 +53,8 @@ typedef struct Atom{
 }Atom;
 
 Atom* allocate_atom();
-Atom* allocate_number_atom(int32_t value);
-Atom* allocate_string_atom(const char *value);
+Atom* allocate_number_atom();
+Atom* allocate_string_atom();
 #define allocate_function_atom() allocate_atom()
 
 void tisp_tostring(Atom* atom, char* str);
