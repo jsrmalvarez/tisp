@@ -28,16 +28,16 @@ FunctionType get_f_type(char* f_label){
   return ret_val; 
 }
 
-void strcpy_max_ensure_zero(const char* str, char* ret, size_t ret_size){
+/*void strcpy_max_ensure_zero(const char* str, char* ret, size_t ret_size){
   size_t str_size = strlen(str);
   if(str_size > ret_size - 1){
     str_size = ret_size - 1;
   }
   memcpy(ret, str, str_size);
   ret[str_size + 1] = 0;
-}
+}*/
 
-void print_impl(const char* str, char* ret, size_t ret_size){
+void print_impl(const char* str, char* ret, size_t ret_size){  
   echo_impl(str, ret, ret_size);
   printf("%s", str);
 }

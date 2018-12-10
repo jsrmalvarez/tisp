@@ -59,7 +59,7 @@ void free_atom(Atom* atom);
 #ifdef DEBUG
 void print_atom_stats();
 #else
-#define print_atom_stats() void()
+#define print_atom_stats() (void)0
 #endif
 void tisp_tostring(Atom* atom, char* str);
 

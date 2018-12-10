@@ -3,13 +3,19 @@
 #include <stdio.h>
 
 static Atom ATOMS[MAX_TREE_ELEMENTS];
-static size_t available_atoms = MAX_TREE_ELEMENTS;
+static size_t available_atoms = 0;
 static bool atoms_initialized = false;
+
+void init_atom(Atom* atom){  
+  memset(atom, 0, sizeof(Atom));
+  atom->last_children_index = -1;
+}
 
 void init_atoms(){
   for(size_t n = 0; n < sizeof(ATOMS)/sizeof(ATOMS[0]); n++){
     free_atom(&ATOMS[n]);
   }
+  atoms_initialized = true;
 }
 
 #ifdef DEBUG
@@ -39,14 +45,14 @@ Atom* allocate_atom(AtomType type){
     // TODO: error 
   }
 
+  print_atom_stats();
+
   return atom;
 }
 
 void free_atom(Atom* atom){
-  memset(atom, 0, sizeof(Atom));
-  atom->last_children_index = -1;
+  init_atom(atom);
   atom->type = FREE;
-
   available_atoms++;
 }
 
@@ -56,15 +62,15 @@ void tisp_tostring(Atom* atom, char* str){
       printf("FREE");
       break;
     case UNINITIALIZED:
-      printf("UNINITIALIZED");
+      sprintf(str, "UNINITIALIZED");
     case STRING:
-      printf("%s", atom->sz_value);
+      sprintf(str, "%s", atom->sz_value);
       break;
     case NUMBER:
-      printf("%d", atom->int32_value);
+      sprintf(str, "%d", atom->int32_value);
       break;
     case FUNCTION:
-      printf("<<%s>>", atom->label);
+      sprintf(str, "<<%s>>", atom->label);
       break;
   }
 }
