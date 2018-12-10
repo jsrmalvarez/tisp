@@ -94,16 +94,27 @@ Atom* call_c_func(Atom* fun){
         else{
           parameter = fun->children[0]->sz_value;
         }
-        ret_val = allocate_string_atom();
-        fun->c_func_sz_sz(parameter, ret_val->sz_value, sizeof(ret_val->sz_value));
+        ret_val = allocate_atom(STRING);
+        if(ret_val == NULL){
+          error = RUNTIME_ERR_NO_FREE_ATOMS;
+        }
+        else{
+          fun->c_func_sz_sz(parameter, ret_val->sz_value, sizeof(ret_val->sz_value));
+        }
       }
       break;
     case F_N_N_N:
       {
-        ret_val = allocate_number_atom();
-        fun->c_func_n_n_n(fun->children[0]->int32_value,
-                          fun->children[1]->int32_value,
-                          &ret_val->int32_value);
+        ret_val = allocate_atom(NUMBER);
+        if(ret_val == NULL){
+          error = RUNTIME_ERR_NO_FREE_ATOMS;
+        }
+        else{
+          ret_val->type = NUMBER;
+          fun->c_func_n_n_n(fun->children[0]->int32_value,
+                            fun->children[1]->int32_value,
+                            &ret_val->int32_value);
+        }
       }
       break;
     default:

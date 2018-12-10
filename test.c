@@ -54,6 +54,9 @@ uint8_t print_runtime_error(){
     case RUNTIME_ERR_BAD_PARAMETER_TYPE:
       printf("- Bad parameter type\n");
       break;
+    case RUNTIME_ERR_NO_FREE_ATOMS:
+      printf("- No free atoms\n");
+      break;
   }
 
   return error != RUNTIME_ERR_NO_ERR;

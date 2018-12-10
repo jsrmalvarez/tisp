@@ -7,6 +7,8 @@
 #include <stdbool.h>
 
 typedef enum{
+  FREE,
+  UNINITIALIZED,
   FUNCTION,
   NUMBER,
   STRING
@@ -26,7 +28,6 @@ typedef enum{
 #define MAX_TREE_ELEMENTS 256//MAX_FUN_PARAMS^MAX_FUN_RECURSION
 
 typedef struct Atom{
-  bool free;
   AtomType type;
   union{
     struct{
@@ -52,11 +53,14 @@ typedef struct Atom{
 
 }Atom;
 
-Atom* allocate_atom();
-Atom* allocate_number_atom();
-Atom* allocate_string_atom();
-#define allocate_function_atom() allocate_atom()
-
+void init_atoms();
+Atom* allocate_atom(AtomType type);
+void free_atom(Atom* atom);
+#ifdef DEBUG
+void print_atom_stats();
+#else
+#define print_atom_stats() void()
+#endif
 void tisp_tostring(Atom* atom, char* str);
 
 
