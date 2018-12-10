@@ -83,6 +83,7 @@ Atom* parse_atom(const char* atom_start, const char* atom_end, bool is_function)
       if((numerical_value = strtol(atom_start, NULL, 0)) != 0){ // Base autodetected
         ret_val->type = NUMBER;
         ret_val->int32_value = numerical_value;
+        ret_val = reallocate_atom(ret_val);
       }
       else{
         if(errno != 0){
@@ -95,23 +96,16 @@ Atom* parse_atom(const char* atom_start, const char* atom_end, bool is_function)
           if(isdigit((int)*atom_start)){
             ret_val->type = NUMBER;
             ret_val->int32_value = 0;
+            ret_val = reallocate_atom(ret_val);
           }
           else{
             // strtol returned 0 because no conversion
             // could be performed.
-
-            // WILL NOT DO THIS. FUNCTIONS CANNOT BE
-            // PARAMETERS AT THIS MOMENT:
-            // Check if its a function
-            //if(get_f_type(ret_val->label) != F_UNDEFINED){
-            //  ret_val->type = FUNCTION;
-            //}
-            //else{
-              ret_val->type = STRING;
-              // Copy string, the size is already checked:
-              memcpy(ret_val->sz_value, atom_start, atom_size);
-              ret_val->sz_value[atom_size] = 0;
-            //}
+            ret_val->type = STRING;
+            // Copy string, the size is already checked:
+            memcpy(ret_val->sz_value, atom_start, atom_size);
+            ret_val->sz_value[atom_size] = 0;
+            ret_val = reallocate_atom(ret_val);
           }
         }
       }
@@ -129,7 +123,7 @@ bool process_atom(Atom* new_atom){
     if(is_first_on_list){
 
       Atom* tree_parent = tree_parents[last_tree_parent_index];
-      if(tree_parent != NULL){// && tree_parent->type == FUNCTION){
+      if(tree_parent != NULL){
         // Not whole root
         // Insert first_on_list node on parent's children list
         tree_parent->last_children_index++;
@@ -155,9 +149,7 @@ bool process_atom(Atom* new_atom){
     else{
       Atom* tree_parent = tree_parents[last_tree_parent_index];
       if(tree_parent == NULL){
-        // Literal atom (no parentheses, no function form)
         error |= SYNTAX_ERR_SYNTAX_ERROR;
-        //tree_parents[last_tree_parent_index] = new_atom;
         return false;
       }
       else{
@@ -205,8 +197,10 @@ Atom* tisp_interpreter_read_str(const char* str){
   if(new_atom == NULL){ \
     error |= SYNTAX_ERR_TOO_MUCH_ATOMS; \
   } \
-  print_atom(new_atom, list_level); \
-  process_atom(new_atom) \
+  else{ \
+    print_atom(new_atom, list_level); \
+    process_atom(new_atom); \
+  }
 
   printf("ORIGINAL INPUT:\n>>%s<<\n", str);
 

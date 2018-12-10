@@ -7,6 +7,7 @@
 #include <stdbool.h>
 
 typedef enum{
+  PRE_INIT_ATOMS,
   FREE,
   UNINITIALIZED,
   FUNCTION,
@@ -55,6 +56,9 @@ typedef struct Atom{
 
 void init_atoms();
 Atom* allocate_atom(AtomType type);
+//Atom* allocate_atom_type_number(int32_t value);
+//Atom* allocate_atom_type_string(const char* value);
+Atom* reallocate_atom(Atom* atom);
 void free_atom(Atom* atom);
 #ifdef DEBUG
 void print_atom_stats();

@@ -91,6 +91,9 @@ int main(){
             char result_str[MAX_ATOM_STR_SIZE];
             tisp_tostring(result, result_str);
             printf("%s\n", result_str);
+            
+            free_atom(input);
+            free_atom(result);
           }
         }
       }

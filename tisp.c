@@ -99,6 +99,7 @@ Atom* call_c_func(Atom* fun){
         else{
           printf("call_c_func of: %s (type SZ_SZ)\n", fun->label);
           fun->c_func_sz_sz(parameter, ret_val->sz_value, sizeof(ret_val->sz_value));
+          ret_val = reallocate_atom(ret_val);
         }
       }
       break;
@@ -114,6 +115,7 @@ Atom* call_c_func(Atom* fun){
           fun->c_func_n_n_n(fun->children[0]->int32_value,
                             fun->children[1]->int32_value,
                             &ret_val->int32_value);
+          ret_val = reallocate_atom(ret_val);
         }
       }
       break;
