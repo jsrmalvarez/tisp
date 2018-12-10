@@ -21,7 +21,9 @@ static const F_LUTEntry F_LUT[] = {
   {"+", F_N_N_N, (void(*)(void))sum_impl}
 };
 
-ssize_t get_last_LUT_index();
 FunctionType get_f_type(char* f_label);
+
+typedef void(*c_func_t)(void);
+c_func_t get_c_func(char* f_label);
 
 #endif//_TISP_IMPL_H_

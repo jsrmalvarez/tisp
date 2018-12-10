@@ -60,14 +60,14 @@ void assign_c_func(Atom* fun){
   switch(fun->c_func_type){
     case F_SZ_SZ:
       {
-      ssize_t last_LUT_index = get_last_LUT_index();
-      fun->c_func_sz_sz = (void(*)(const char*,char*,size_t))F_LUT[last_LUT_index].c_func;
+      c_func_t c_func = get_c_func(fun->label);
+      fun->c_func_sz_sz = (void(*)(const char*,char*,size_t))c_func;
       }
       break;
     case F_N_N_N:
       {
-      ssize_t last_LUT_index = get_last_LUT_index();
-      fun->c_func_n_n_n = (void(*)(int32_t, int32_t, int32_t*))F_LUT[last_LUT_index].c_func;
+      c_func_t c_func = get_c_func(fun->label);
+      fun->c_func_n_n_n = (void(*)(int32_t, int32_t, int32_t*))c_func;
       }
       break;
     default:
@@ -89,16 +89,15 @@ Atom* call_c_func(Atom* fun){
             // Conversion never made
             sprintf(fun->children[0]->sz_value, "%d", fun->children[0]->int32_value);
           }
-          parameter = fun->children[0]->sz_value;
         }
-        else{
-          parameter = fun->children[0]->sz_value;
-        }
+
+        parameter = fun->children[0]->sz_value;
         ret_val = allocate_atom(STRING);
         if(ret_val == NULL){
           error = RUNTIME_ERR_NO_FREE_ATOMS;
         }
         else{
+          printf("call_c_func of: %s (type SZ_SZ)\n", fun->label);
           fun->c_func_sz_sz(parameter, ret_val->sz_value, sizeof(ret_val->sz_value));
         }
       }
@@ -111,6 +110,7 @@ Atom* call_c_func(Atom* fun){
         }
         else{
           ret_val->type = NUMBER;
+          printf("call_c_func of: %s (type N_N_N)\n", fun->label);
           fun->c_func_n_n_n(fun->children[0]->int32_value,
                             fun->children[1]->int32_value,
                             &ret_val->int32_value);
