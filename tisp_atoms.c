@@ -148,8 +148,8 @@ void tisp_tostring(Atom* atom, char* str){
 }
 
 #ifdef DEBUG
-void print_atoms_to(size_t N){
-  for(size_t n = 0; n < N; n++){
+void print_atoms_from_to(size_t from, size_t to){
+  for(size_t n = from; n < to; n++){
     char str[MAX_ATOM_STR_SIZE];
     tisp_tostring(&ATOMS[n], str);
     printf("ATOMS[%03lu] 0x%08lX (%03u): %s\n", n, (uintptr_t)&ATOMS[n], ATOMS[n].ref_count, str);

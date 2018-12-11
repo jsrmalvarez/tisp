@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "tisp_impl.h"
+#include "tisp_atoms.h"
 
 FunctionType get_f_type(char* f_label){
   FunctionType ret_val = F_UNDEFINED;
@@ -29,6 +30,8 @@ c_func_t get_c_func(char* f_label){
   return ret_val; 
 }
 
+//static char ERROR[] = "ERROR";
+
 void print_impl(const char* str, char* ret, size_t ret_size){  
   echo_impl(str, ret, ret_size);
   printf("%s", str);
@@ -47,3 +50,37 @@ void echo_impl(const char* str, char* ret, size_t ret_size){
 void sum_impl(int32_t a, int32_t b, int32_t* ret){
   *ret = a + b;
 }
+
+/*
+void atoms_impl(int32_t from, int32_t to, char* ret, size_t ret_size){
+  if(from == -1){
+    // From the beginning
+    from = 0;
+  }
+
+  if(to == -1){
+    // to the end
+    to = MAX_TREE_ELEMENTS;
+  }
+
+
+  if(from < 0 || to < 0 || ret == NULL){
+    size_t N = strlen(ERROR);
+    if (strlen(ERROR) > ret_size){
+      N = ret_size;
+    }
+
+    if(N > 0){
+      strncpy(ret, ERROR, N);
+      ret[N - 1] = '\0';
+    }
+  }
+  else{
+    for(size_t n = from; n < to; n++){
+      char str[MAX_ATOM_STR_SIZE];
+      tisp_tostring(&ATOMS[n], str);
+      printf("ATOMS[%03lu] 0x%08lX (%03u): %s\n", n, (uintptr_t)&ATOMS[n], ATOMS[n].ref_count, str);
+    }
+  }
+}
+*/

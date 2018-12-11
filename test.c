@@ -91,7 +91,7 @@ int main(){
     if(!print_interpreter_error()){
       if(input != NULL){
         printf("- Pre eval\n");
-        print_atoms_to(16);
+        print_atoms_from_to(0,16);
         // Eval
         Atom* result = tisp_eval(input);
         // Print
@@ -102,11 +102,11 @@ int main(){
             printf("%s\n", result_str);
 
             printf("- Post eval, pre free input\n");
-            print_atoms_to(16);
+            print_atoms_from_to(0,16);
 
             free_atom(input);
             printf("- Post free input, pre free result\n");
-            print_atoms_to(16);
+            print_atoms_from_to(0,16);
             
 
             /*printf("\n\n");
@@ -115,7 +115,7 @@ int main(){
 
             free_atom(result);
             printf("- Post free result\n");
-            print_atoms_to(16);
+            print_atoms_from_to(0,16);
           }
         }
       }

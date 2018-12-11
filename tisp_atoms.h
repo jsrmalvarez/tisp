@@ -20,7 +20,8 @@ typedef enum{
   F_UNKNOWN,
   F_UNDEFINED,
   F_SZ_SZ,
-  F_N_N_N
+  F_N_N_N,
+  F_SZ
 }FunctionType;
 
 typedef struct Atom{
@@ -61,13 +62,13 @@ void indent_print(const char* str, size_t indent_level);
 void print_ast(Atom* atom, size_t depth);
 void print_atom(Atom* atom, size_t indent_level);
 void print_atom_stats();
-void print_atoms_to(size_t N);
+void print_atoms_from_to(size_t from, size_t to);
 #else
 #define indent_print(str, indent_level) (void)0
 #define print_ast(a,b);
 #define print_atom(a,b) (void)0
 #define print_atom_stats() (void)0
-#define print_atoms_to(a)  (void)0
+#define print_atoms_from_to(from, to) (void)0
 #endif
 void tisp_tostring(Atom* atom, char* str);
 
