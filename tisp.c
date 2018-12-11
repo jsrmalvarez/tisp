@@ -18,12 +18,12 @@ RuntimeErr tisp_get_error(){
 void check_param_number(Atom* fun){
   switch(fun->c_func_type){
     case F_SZ_SZ:
-      if((fun->last_children_index + 1) != 1){
+      if((fun->num_children) != 1){
         error = RUNTIME_ERR_BAD_ARITY;
       }
       break;
     case F_N_N_N:
-      if((fun->last_children_index + 1) != 2){
+      if((fun->num_children) != 2){
         error = RUNTIME_ERR_BAD_ARITY;
       }
       break;
@@ -35,8 +35,7 @@ void check_param_number(Atom* fun){
 }
 
 void check_param_types(Atom* fun){
-  ssize_t n = 0;
-  for(; n <= fun->last_children_index; n++){
+  for(size_t n = 0; n < fun->num_children; n++){
     Atom* param = fun->children[n];
     if(fun->c_func_type == F_SZ_SZ){
       if(n == 0 && param->type != STRING && param->type != NUMBER){
@@ -163,8 +162,7 @@ Atom* tisp_eval(Atom* input){
 
       }
 
-      ssize_t n = 0;
-      for(; n <= input->last_children_index; n++){
+      for(size_t n = 0; n < input->num_children; n++){
         Atom* eval_result = tisp_eval(input->children[n]);
         if(error != RUNTIME_ERR_NO_ERR){
           ret_val = NULL;

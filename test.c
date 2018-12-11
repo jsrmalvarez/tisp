@@ -85,7 +85,7 @@ int main(){
     printf("----> %lu\n", sizeof(a.label));
     printf("----> %lu\n", sizeof(a.c_func_sz_sz));
     printf("----> %lu\n", sizeof(a.children));
-    printf("----> %lu\n", sizeof(a.last_children_index));
+    printf("----> %lu\n", sizeof(a.num_children));
 
     Atom* input = tisp_interpreter_read_str(line);
     if(!print_interpreter_error()){

@@ -8,7 +8,7 @@
 #include "tisp_config.h"
 
 typedef enum{
-  PRE_INIT_ATOMS,
+  PRE_FREE_ATOMS=0,
   FREE,
   UNINITIALIZED,
   FUNCTION,
@@ -40,8 +40,8 @@ typedef struct Atom{
         //const char*(*c_func_3)(int32_t op1, int32_t op2);
         //const char*(*c_func_4)(const char* op1, const char* op2);
       };
-      struct Atom*   children[MAX_FUN_PARAMS];
-      ssize_t        last_children_index;
+      struct Atom*  children[MAX_FUN_PARAMS];
+      size_t        num_children;
     };
   };
 

@@ -71,52 +71,52 @@ Atom* parse_atom(const char* atom_start, const char* atom_end, bool is_function)
 
 static bool is_first_on_list;
 static Atom* tree_parents[MAX_FUN_RECURSION];
-static ssize_t last_tree_parent_index; 
+static size_t tree_parent_count;
 
 bool process_atom(Atom* new_atom){
   if(!error){
     if(is_first_on_list){
 
-      Atom* tree_parent = tree_parents[last_tree_parent_index];
+      Atom* tree_parent = tree_parents[tree_parent_count - 1];
       if(tree_parent != NULL){
         // Not whole root
         // Insert first_on_list node on parent's children list
-        tree_parent->last_children_index++;
+        tree_parent->num_children++;
         //printf("child %ld\n", tree_parent->last_children_index);
-        if(tree_parent->last_children_index == MAX_FUN_PARAMS){
+        if(tree_parent->num_children > MAX_FUN_PARAMS){
           error |= SYNTAX_ERR_TOO_MUCH_PARAMS;
           is_first_on_list = false;
           return false;
         }
-        tree_parent->children[tree_parent->last_children_index] = new_atom;
+        tree_parent->children[tree_parent->num_children - 1] = new_atom;
         new_atom->ref_count++;
       }
 
-      last_tree_parent_index++;
+      tree_parent_count++;
       //printf("root %ld\n", last_tree_parent_index);
-      if(last_tree_parent_index == MAX_FUN_RECURSION){
+      if(tree_parent_count > MAX_FUN_RECURSION){
         error |= SYNTAX_ERR_TOO_MUCH_RECURSION;
         is_first_on_list = false;
         return false;
       }
-      tree_parents[last_tree_parent_index] = new_atom;
+      tree_parents[tree_parent_count - 1] = new_atom;
 
     }
     else{
-      Atom* tree_parent = tree_parents[last_tree_parent_index];
+      Atom* tree_parent = tree_parents[tree_parent_count - 1];
       if(tree_parent == NULL){
         error |= SYNTAX_ERR_SYNTAX_ERROR;
         return false;
       }
       else{
-        tree_parent->last_children_index++;
+        tree_parent->num_children++;
         //printf("child %ld\n", tree_parent->last_children_index);
-        if(tree_parent->last_children_index == MAX_FUN_PARAMS){
+        if(tree_parent->num_children > MAX_FUN_PARAMS){
           error |= SYNTAX_ERR_TOO_MUCH_PARAMS;
           is_first_on_list = false;
           return false;
         }
-        tree_parent->children[tree_parent->last_children_index] = new_atom;
+        tree_parent->children[tree_parent->num_children - 1] = new_atom;
         new_atom->ref_count++;
       }
     }
@@ -143,7 +143,7 @@ Atom* tisp_interpreter_read_str(const char* str){
   for(size_t n = 0; n < MAX_FUN_RECURSION; n++){
     tree_parents[n] = NULL;
   }
-  last_tree_parent_index = -1; 
+  tree_parent_count = 0; 
 
 #define TISP_MARK_ATOM_START() reading_atom = true;  atom_start = pc
 
@@ -187,7 +187,7 @@ Atom* tisp_interpreter_read_str(const char* str){
         list_level--;
       }
 
-      last_tree_parent_index--;
+      tree_parent_count--;
 
       indent_print("LIST_END\n", list_level);
     }

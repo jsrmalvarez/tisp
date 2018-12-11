@@ -13,8 +13,8 @@ static size_t available_atoms = 0;
 
 void init_atom(Atom* atom){  
   memset(atom, 0, sizeof(Atom));
-  atom->last_children_index = -1;
-  atom->type = PRE_INIT_ATOMS;
+  atom->num_children = 0;
+  atom->type = PRE_FREE_ATOMS;
   atom->ref_count = 0;
 }
 
@@ -100,7 +100,7 @@ void free_atom(Atom* atom){
 #endif    
   if(atom->type != FREE && (atom->ref_count == 0 || available_atoms == MAX_TREE_ELEMENTS - 1)){
     if(atom->type == FUNCTION){
-      for(ssize_t n = 0; n <= atom->last_children_index; n++){
+      for(size_t n = 0; n < atom->num_children; n++){
         atom->children[n]->ref_count--;
         free_atom(atom->children[n]);
       }
@@ -127,8 +127,8 @@ void free_atom(Atom* atom){
 
 void tisp_tostring(Atom* atom, char* str){
   switch(atom->type){
-    case PRE_INIT_ATOMS:
-      sprintf(str, "PRE_INIT_ATOMS");
+    case PRE_FREE_ATOMS:
+      sprintf(str, "PRE_FREE_ATOMS");
       break;
     case FREE:
       sprintf(str, "FREE");
@@ -190,8 +190,7 @@ void print_atom(Atom* atom, size_t indent_level){
 #ifdef DEBUG
 void print_ast(Atom* atom, size_t depth){
   print_atom(atom, depth);
-  ssize_t n = 0;
-  for(; n <= atom->last_children_index; n++){
+  for(size_t n = 0; n < atom->num_children; n++){
     print_ast(atom->children[n], depth+1);
   }
 }
