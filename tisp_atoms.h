@@ -5,6 +5,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include "tisp_config.h"
 
 typedef enum{
   PRE_INIT_ATOMS,
@@ -21,12 +22,6 @@ typedef enum{
   F_SZ_SZ,
   F_N_N_N
 }FunctionType;
-
-
-#define MAX_ATOM_STR_SIZE 16
-#define MAX_FUN_PARAMS 4
-#define MAX_FUN_RECURSION 4
-#define MAX_TREE_ELEMENTS 256//MAX_FUN_PARAMS^MAX_FUN_RECURSION
 
 typedef struct Atom{
   AtomType type;
@@ -54,6 +49,7 @@ typedef struct Atom{
 
 }Atom;
 
+
 void init_atoms();
 Atom* allocate_atom(AtomType type);
 //Atom* allocate_atom_type_number(int32_t value);
@@ -61,9 +57,17 @@ Atom* allocate_atom(AtomType type);
 Atom* reallocate_atom(Atom* atom);
 void free_atom(Atom* atom);
 #ifdef DEBUG
+void indent_print(const char* str, size_t indent_level);
+void print_ast(Atom* atom, size_t depth);
+void print_atom(Atom* atom, size_t indent_level);
 void print_atom_stats();
+void print_atoms_to(size_t N);
 #else
+#define indent_print(str, indent_level) (void)0
+#define print_ast(a,b);
+#define print_atom(a,b) (void)0
 #define print_atom_stats() (void)0
+#define print_atoms_to(a)  (void)0
 #endif
 void tisp_tostring(Atom* atom, char* str);
 

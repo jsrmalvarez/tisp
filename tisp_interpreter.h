@@ -14,16 +14,5 @@
 Atom* tisp_interpreter_read_str(const char* str);
 //const char* tisp_interpreter_get_output_str();
 uint8_t tisp_interpreter_get_error();
-#ifndef DEBUG
-#define print_atom(a,b) (void)0
-#else
-void print_atom(Atom* atom, size_t indent_level);
-#endif
-
-#ifndef DEBUG
-#define print_ast(a,b);
-#else
-void print_ast(Atom* atom, size_t depth);
-#endif
 
 #endif//_TISP_INTERPRETER_H_

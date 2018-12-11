@@ -166,7 +166,18 @@ Atom* tisp_eval(Atom* input){
           break;
         }
 
-        input->children[n] = eval_result;
+        if(input->children[n]->type == FUNCTION){
+          // FUNCTIONS eventually evaluate to STRING or NUMBER
+          // Substitute FUNCTION child for its result atom
+          // and discard FUNCTION child;
+          printf("-- PRE SUBSTITUTE\n");
+          print_ast(input, 0);
+          Atom* evaluated_function_child = input->children[n];
+          input->children[n] = eval_result;
+          printf("-- POST SUBSTITUTE\n");
+          print_ast(input, 0);
+          //free_atom(evaluated_function_child);
+        }
       }
 
       if(error == RUNTIME_ERR_NO_ERR){

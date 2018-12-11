@@ -2,6 +2,12 @@
 #include <string.h>
 #include <stdio.h>
 
+
+#ifndef DEBUG
+#define printf(a, ...) (void)0
+#endif
+
+
 static Atom ATOMS[MAX_TREE_ELEMENTS];
 static size_t available_atoms = 0;
 
@@ -82,24 +88,33 @@ void free_atom(Atom* atom){
   if(atom->type != FREE){
     if(atom->type == FUNCTION){
       for(ssize_t n = 0; n <= atom->last_children_index; n++){
-        free_atom((Atom*)&atom->children[n]);
+        free_atom(atom->children[n]);
       }
     }
+#ifdef DEBUG    
+    char str[MAX_ATOM_STR_SIZE];
+    tisp_tostring(atom, str);
+    printf("free_atom(%s) 0x%08lX: ", str, (uintptr_t)atom);
+#endif    
     init_atom(atom);
     atom->type = FREE;
     available_atoms++;
   }
-  printf("FREE: ");
+  else{
+#ifdef DEBUG    
+    printf("free_atom() 0x%08lX ALREADY FREE ", (uintptr_t)atom);
+#endif    
+  }
   print_atom_stats();
 }
 
 void tisp_tostring(Atom* atom, char* str){
   switch(atom->type){
     case PRE_INIT_ATOMS:
-      printf("PRE_INIT_ATOMS");
+      sprintf(str, "PRE_INIT_ATOMS");
       break;
     case FREE:
-      printf("FREE");
+      sprintf(str, "FREE");
       break;
     case UNINITIALIZED:
       sprintf(str, "UNINITIALIZED");
@@ -110,7 +125,57 @@ void tisp_tostring(Atom* atom, char* str){
       sprintf(str, "%d", atom->int32_value);
       break;
     case FUNCTION:
-      sprintf(str, "<<%s>>", atom->label);
+      sprintf(str, "(%s)", atom->label);
       break;
   }
 }
+
+#ifdef DEBUG
+void print_atoms_to(size_t N){
+  for(size_t n = 0; n < N; n++){
+    char str[MAX_ATOM_STR_SIZE];
+    tisp_tostring(&ATOMS[n], str);
+    printf("ATOMS[%03lu] 0x%08lX : %s\n", n, (uintptr_t)&ATOMS[n], str);
+  }
+}
+#endif
+
+#ifdef DEBUG
+void indent_print(const char* str, size_t indent_level){
+
+  const char* pc = str;
+  for(size_t n = 0; n < indent_level; n++){
+    printf(" ");
+  }
+  while(*pc != 0){
+    printf("%c", *pc);
+    if(*pc == '\n' && *(pc+1) != 0){
+      for(size_t n = 0; n < indent_level; n++){
+        printf(" ");
+      }
+    }
+    pc++;
+  }
+}
+#endif
+
+#ifdef DEBUG
+void print_atom(Atom* atom, size_t indent_level){
+  indent_print(" ", indent_level);
+  char str[MAX_ATOM_STR_SIZE];
+  tisp_tostring(atom, str);
+  printf("%s", str);
+  printf(" : 0x%08lX\n", (uintptr_t)atom);
+}
+#endif
+
+
+#ifdef DEBUG
+void print_ast(Atom* atom, size_t depth){
+  print_atom(atom, depth);
+  ssize_t n = 0;
+  for(; n <= atom->last_children_index; n++){
+    print_ast(atom->children[n], depth+1);
+  }
+}
+#endif

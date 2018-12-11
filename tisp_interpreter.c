@@ -16,51 +16,6 @@
 
 static uint8_t error = SYNTAX_ERR_NO_ERROR;
 
-
-#ifndef DEBUG
-#define printf(a, ...) (void)0
-#endif
-
-#ifndef DEBUG
-#define indent_print(str, indent_level) (void)0
-#else
-void indent_print(const char* str, size_t indent_level){
-
-  const char* pc = str;
-  for(size_t n = 0; n < indent_level; n++){
-    printf(" ");
-  }
-  while(*pc != 0){
-    printf("%c", *pc);
-    if(*pc == '\n' && *(pc+1) != 0){
-      for(size_t n = 0; n < indent_level; n++){
-        printf(" ");
-      }
-    }
-    pc++;
-  }
-}
-#endif
-
-#ifdef DEBUG
-void print_atom(Atom* atom, size_t indent_level){
-  indent_print(">>", indent_level);
-  printf(atom->label, indent_level);
-  printf("<<\n");
-}
-#endif
-
-
-#ifdef DEBUG
-void print_ast(Atom* atom, size_t depth){
-  print_atom(atom, depth);
-  ssize_t n = 0;
-  for(; n <= atom->last_children_index; n++){
-    print_ast(atom->children[n], depth+1);
-  }
-}
-#endif
-
 Atom* parse_atom(const char* atom_start, const char* atom_end, bool is_function){
   Atom* ret_val = allocate_atom(UNINITIALIZED);
   if(ret_val){
@@ -127,7 +82,7 @@ bool process_atom(Atom* new_atom){
         // Not whole root
         // Insert first_on_list node on parent's children list
         tree_parent->last_children_index++;
-        printf("child %ld\n", tree_parent->last_children_index);
+        //printf("child %ld\n", tree_parent->last_children_index);
         if(tree_parent->last_children_index == MAX_FUN_PARAMS){
           error |= SYNTAX_ERR_TOO_MUCH_PARAMS;
           is_first_on_list = false;
@@ -137,7 +92,7 @@ bool process_atom(Atom* new_atom){
       }
 
       last_tree_parent_index++;
-      printf("root %ld\n", last_tree_parent_index);
+      //printf("root %ld\n", last_tree_parent_index);
       if(last_tree_parent_index == MAX_FUN_RECURSION){
         error |= SYNTAX_ERR_TOO_MUCH_RECURSION;
         is_first_on_list = false;
@@ -154,7 +109,7 @@ bool process_atom(Atom* new_atom){
       }
       else{
         tree_parent->last_children_index++;
-        printf("child %ld\n", tree_parent->last_children_index);
+        //printf("child %ld\n", tree_parent->last_children_index);
         if(tree_parent->last_children_index == MAX_FUN_PARAMS){
           error |= SYNTAX_ERR_TOO_MUCH_PARAMS;
           is_first_on_list = false;

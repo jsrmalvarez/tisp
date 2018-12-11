@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <string.h>
-#include "tisp_interpreter.h"
 #include "tisp.h"
 
 uint8_t print_interpreter_error(){
@@ -83,6 +82,8 @@ int main(){
     Atom* input = tisp_interpreter_read_str(line);
     if(!print_interpreter_error()){
       if(input != NULL){
+        printf("- Pre eval\n");
+        print_atoms_to(16);
         // Eval
         Atom* result = tisp_eval(input);
         // Print
@@ -91,9 +92,22 @@ int main(){
             char result_str[MAX_ATOM_STR_SIZE];
             tisp_tostring(result, result_str);
             printf("%s\n", result_str);
-            
+
+            printf("- Post eval, pre free input\n");
+            print_atoms_to(16);
+
             free_atom(input);
+            printf("- Post free input, pre free result\n");
+            print_atoms_to(16);
+            
+
+            /*printf("\n\n");
+            tisp_tostring(result, result_str);
+            printf("%s\n", result_str);*/
+
             free_atom(result);
+            printf("- Post free result\n");
+            print_atoms_to(16);
           }
         }
       }
