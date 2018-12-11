@@ -25,13 +25,13 @@ Atom* parse_atom(const char* atom_start, const char* atom_end, bool is_function)
       error |= SYNTAX_ERR_ATOM_LABEL_TOO_LONG;
       return NULL;
     }
-    memcpy(ret_val->label, atom_start, atom_size);
-    ret_val->label[atom_size] = 0;
     
 
     if(is_function){
       ret_val->type = FUNCTION;
       ret_val->c_func_type = F_UNKNOWN;
+      memcpy(ret_val->label, atom_start, atom_size);
+      ret_val->label[atom_size] = 0;
     }
     else{
       int32_t numerical_value;
@@ -89,6 +89,7 @@ bool process_atom(Atom* new_atom){
           return false;
         }
         tree_parent->children[tree_parent->last_children_index] = new_atom;
+        new_atom->ref_count++;
       }
 
       last_tree_parent_index++;
@@ -116,6 +117,7 @@ bool process_atom(Atom* new_atom){
           return false;
         }
         tree_parent->children[tree_parent->last_children_index] = new_atom;
+        new_atom->ref_count++;
       }
     }
 

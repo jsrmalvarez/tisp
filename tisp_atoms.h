@@ -32,6 +32,7 @@ typedef struct Atom{
     };
     struct{
       FunctionType c_func_type;
+      char label[MAX_FUN_LABEL_STR_SIZE];
       union{
         void(*c_func_sz_sz)(const char* op1, char* ret, size_t ret_size);
         void(*c_func_n_n_n)(int32_t op1, int32_t op2, int32_t* ret);
@@ -39,13 +40,12 @@ typedef struct Atom{
         //const char*(*c_func_3)(int32_t op1, int32_t op2);
         //const char*(*c_func_4)(const char* op1, const char* op2);
       };
+      struct Atom*   children[MAX_FUN_PARAMS];
+      ssize_t        last_children_index;
     };
   };
 
-  char      label[MAX_ATOM_STR_SIZE];
-
-  struct Atom*   children[MAX_FUN_PARAMS];
-  ssize_t        last_children_index;
+  uint8_t ref_count;
 
 }Atom;
 

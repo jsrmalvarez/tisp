@@ -79,6 +79,14 @@ int main(){
   char line[1024];
   // Loop Read
   while(fgets(line, sizeof(line), stdin)){
+    Atom a;
+    printf("----> %lu\n", sizeof(a));
+    printf("----> %lu\n", sizeof(a.c_func_type));
+    printf("----> %lu\n", sizeof(a.label));
+    printf("----> %lu\n", sizeof(a.c_func_sz_sz));
+    printf("----> %lu\n", sizeof(a.children));
+    printf("----> %lu\n", sizeof(a.last_children_index));
+
     Atom* input = tisp_interpreter_read_str(line);
     if(!print_interpreter_error()){
       if(input != NULL){

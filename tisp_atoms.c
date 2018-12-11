@@ -15,6 +15,7 @@ void init_atom(Atom* atom){
   memset(atom, 0, sizeof(Atom));
   atom->last_children_index = -1;
   atom->type = PRE_INIT_ATOMS;
+  atom->ref_count = 0;
 }
 
 void init_atoms(){
@@ -65,18 +66,26 @@ Atom* reallocate_atom(Atom* atom){
       // Not the same atom
       if(ATOMS[n].type == STRING && atom->type == STRING){
         if(strncmp(ATOMS[n].sz_value, atom->sz_value, sizeof(atom->sz_value)) == 0){
-          free_atom(atom);
-          ret_val = &ATOMS[n];
-          printf("Found equivalent STRING atom! Reallocated. Saved 1 atom in memory.\n");
-          break;
+          // Should never free an atom with ref_count > 0
+          // Must check if the ret_val atom can withstand more refs.
+          if(atom->ref_count == 0 && ret_val->ref_count < UINT8_MAX){
+            free_atom(atom);
+            ret_val = &ATOMS[n];
+            printf("Found equivalent STRING atom! Reallocated. Saved 1 atom in memory.\n");
+            break;
+          }
         }
       }
       else if(ATOMS[n].type == NUMBER && atom->type == NUMBER){
         if(ATOMS[n].int32_value == atom->int32_value){
-          free_atom(atom);
-          ret_val = &ATOMS[n];
-          printf("Found equivalent NUMBER atom! Reallocated. Saved 1 atom in memory.\n");
-          break;
+          // Should never free an atom with ref_count > 0
+          // Must check if the ret_val atom can withstand more refs.
+          if(atom->ref_count == 0 && ret_val->ref_count < UINT8_MAX){
+            free_atom(atom);
+            ret_val = &ATOMS[n];
+            printf("Found equivalent NUMBER atom! Reallocated. Saved 1 atom in memory.\n");
+            break;
+          }
         }
       }
     }
@@ -85,15 +94,18 @@ Atom* reallocate_atom(Atom* atom){
 }
 
 void free_atom(Atom* atom){
-  if(atom->type != FREE){
+#ifdef DEBUG    
+    char str[MAX_ATOM_STR_SIZE];
+    tisp_tostring(atom, str);
+#endif    
+  if(atom->type != FREE && (atom->ref_count == 0 || available_atoms == MAX_TREE_ELEMENTS - 1)){
     if(atom->type == FUNCTION){
       for(ssize_t n = 0; n <= atom->last_children_index; n++){
+        atom->children[n]->ref_count--;
         free_atom(atom->children[n]);
       }
     }
 #ifdef DEBUG    
-    char str[MAX_ATOM_STR_SIZE];
-    tisp_tostring(atom, str);
     printf("free_atom(%s) 0x%08lX: ", str, (uintptr_t)atom);
 #endif    
     init_atom(atom);
@@ -102,7 +114,12 @@ void free_atom(Atom* atom){
   }
   else{
 #ifdef DEBUG    
-    printf("free_atom() 0x%08lX ALREADY FREE ", (uintptr_t)atom);
+    if(atom->type == FREE){
+      printf("free_atom(%s) 0x%08lX ALREADY FREE ", str, (uintptr_t)atom);
+    }
+    else if(atom->ref_count != 0){
+      printf("free_atom(%s) 0x%08lX REMAINING REFS ref_count: %u ", str, (uintptr_t)atom, atom->ref_count);
+    }
 #endif    
   }
   print_atom_stats();
@@ -135,7 +152,7 @@ void print_atoms_to(size_t N){
   for(size_t n = 0; n < N; n++){
     char str[MAX_ATOM_STR_SIZE];
     tisp_tostring(&ATOMS[n], str);
-    printf("ATOMS[%03lu] 0x%08lX : %s\n", n, (uintptr_t)&ATOMS[n], str);
+    printf("ATOMS[%03lu] 0x%08lX (%03u): %s\n", n, (uintptr_t)&ATOMS[n], ATOMS[n].ref_count, str);
   }
 }
 #endif
@@ -165,7 +182,7 @@ void print_atom(Atom* atom, size_t indent_level){
   char str[MAX_ATOM_STR_SIZE];
   tisp_tostring(atom, str);
   printf("%s", str);
-  printf(" : 0x%08lX\n", (uintptr_t)atom);
+  printf(" : 0x%08lX ref_count: %u\n", (uintptr_t)atom, atom->ref_count);
 }
 #endif
 

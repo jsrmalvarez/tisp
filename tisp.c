@@ -4,6 +4,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#if (MAX_FUN_LABEL_STR_SIZE > MAX_ATOM_STR_SIZE)
+#error MAX_FUN_LABEL_STR_SIZE > MAX_ATOM_STR_SIZE
+#else
+#endif
+
 static RuntimeErr error = RUNTIME_ERR_NO_ERR;
 
 RuntimeErr tisp_get_error(){
@@ -172,11 +177,15 @@ Atom* tisp_eval(Atom* input){
           // and discard FUNCTION child;
           printf("-- PRE SUBSTITUTE\n");
           print_ast(input, 0);
+
           Atom* evaluated_function_child = input->children[n];
           input->children[n] = eval_result;
+          input->children[n]->ref_count++;
+          evaluated_function_child->ref_count--;
+          free_atom(evaluated_function_child);
+
           printf("-- POST SUBSTITUTE\n");
           print_ast(input, 0);
-          //free_atom(evaluated_function_child);
         }
       }
 
@@ -198,22 +207,14 @@ Atom* tisp_eval(Atom* input){
       break;
 
     case NUMBER:
-      #ifdef DEBUG
-      printf("NAME:%s, TYPE:NUMBER VALUE: %d\n", input->label, input->int32_value);
-      #endif
       ret_val = input;
       break;
 
     case STRING:
-      #ifdef DEBUG
-      printf("NAME:%s, TYPE:STRING VALUE: %s\n", input->label, input->sz_value);
-      #endif
       ret_val = input;
       break;
     default:
-      #ifdef DEBUG
       error = RUNTIME_ERR_NOT_IMPLEMENTED;
-      #endif
       ret_val = NULL;
       break;
 
