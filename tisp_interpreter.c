@@ -35,18 +35,26 @@ Atom* parse_atom(const char* atom_start, const char* atom_end, bool is_function)
     }
     else{
       int32_t numerical_value;
-      if((numerical_value = strtol(atom_start, NULL, 0)) != 0){ // Base autodetected
+			bool force_decimal = false;
+			if(atom_start[0] == '0' && atom_start[1] != 'x'  && atom_start[1] != 'X'){
+				// Atom tarts with '0'; prevent octal;
+				force_decimal = true;
+			}
+			
+      if((numerical_value = strtol(atom_start, NULL, force_decimal ? 10 : 0)) != 0){ // Test forced decimal or auto (hex or dec, never octal)
         ret_val->type = NUMBER;
         ret_val->int32_value = numerical_value;
         ret_val = reallocate_atom(ret_val);
       }
-      else{
-        if(errno != 0){
+			else{			
+        /*
+					// This is not supported by some embedded implementations.
+				if(errno != 0){
           error |= SYNTAX_ERR_SYNTAX_ERROR;
           return NULL;
         }
         else{
-          // strtol returned 0 and no error
+          // strtol returned 0 and no error*/
           // Test for number
           if(isdigit((int)*atom_start)){
             ret_val->type = NUMBER;
@@ -62,7 +70,7 @@ Atom* parse_atom(const char* atom_start, const char* atom_end, bool is_function)
             ret_val->sz_value[atom_size] = 0;
             ret_val = reallocate_atom(ret_val);
           }
-        }
+        //}
       }
     }
   }

@@ -9,6 +9,10 @@
 #else
 #endif
 
+// Must be implemeted by user
+FunctionType get_f_type(char* f_label); // Returns function type from function label (which is F_UNDEFINED if the function doesn't exist)
+c_func_t get_c_func(char* f_label); // Returns a pointer to function from function label (or NULL if the function doesn't exist)
+
 static RuntimeErr error = RUNTIME_ERR_NO_ERR;
 
 RuntimeErr tisp_get_error(){
@@ -17,6 +21,11 @@ RuntimeErr tisp_get_error(){
 
 void check_param_number(Atom* fun){
   switch(fun->c_func_type){
+		case F_SZ:
+			if((fun->num_children) != 0){
+        error = RUNTIME_ERR_BAD_ARITY;
+      }
+			break;
     case F_SZ_SZ:
       if((fun->num_children) != 1){
         error = RUNTIME_ERR_BAD_ARITY;
@@ -27,6 +36,11 @@ void check_param_number(Atom* fun){
         error = RUNTIME_ERR_BAD_ARITY;
       }
       break;
+		case F_SZ_N_N_N:
+      if((fun->num_children) != 3){
+        error = RUNTIME_ERR_BAD_ARITY;
+      }
+      break;			
     default:
       error = RUNTIME_ERR_NOT_IMPLEMENTED;
       return;
@@ -53,6 +67,20 @@ void check_param_types(Atom* fun){
         break;
       }
     }
+		else if(fun->c_func_type == F_SZ_N_N_N){
+      if(n == 0 && param->type != NUMBER){
+        error = RUNTIME_ERR_BAD_PARAMETER_TYPE;
+        break;
+      }
+      if(n == 1 && param->type != NUMBER){
+        error = RUNTIME_ERR_BAD_PARAMETER_TYPE;
+        break;
+      }
+			if(n == 2 && param->type != NUMBER){
+        error = RUNTIME_ERR_BAD_PARAMETER_TYPE;
+        break;
+      }
+    }
     else{
       error = RUNTIME_ERR_NOT_IMPLEMENTED;
       break;
@@ -62,10 +90,16 @@ void check_param_types(Atom* fun){
 
 void assign_c_func(Atom* fun){
   switch(fun->c_func_type){
+		case F_SZ:
+      {
+      c_func_t c_func = get_c_func(fun->label);
+      fun->c_func_sz = (void(*)(char*, size_t))c_func;
+      }
+      break;
     case F_SZ_SZ:
       {
       c_func_t c_func = get_c_func(fun->label);
-      fun->c_func_sz_sz = (void(*)(const char*,char*,size_t))c_func;
+      fun->c_func_sz_sz = (void(*)(const char*, char*, size_t))c_func;
       }
       break;
     case F_N_N_N:
@@ -74,6 +108,12 @@ void assign_c_func(Atom* fun){
       fun->c_func_n_n_n = (void(*)(int32_t, int32_t, int32_t*))c_func;
       }
       break;
+		case F_SZ_N_N_N:
+			{
+      c_func_t c_func = get_c_func(fun->label);
+      fun->c_func_sz_n_n_n = (void(*)(int32_t, int32_t, int32_t, char*, size_t))c_func;
+      }
+			break;
     default:
       error = RUNTIME_ERR_NOT_IMPLEMENTED;
       return;
@@ -84,6 +124,19 @@ void assign_c_func(Atom* fun){
 Atom* call_c_func(Atom* fun){
   Atom* ret_val = NULL;
   switch(fun->c_func_type){
+		case F_SZ:
+      {
+				ret_val = allocate_atom(STRING);
+        if(ret_val == NULL){
+          error = RUNTIME_ERR_NO_FREE_ATOMS;
+        }
+        else{
+          printf("call_c_func of: %s (type SZ)\n", fun->label);
+          fun->c_func_sz(ret_val->sz_value, sizeof(ret_val->sz_value));
+          ret_val = reallocate_atom(ret_val);
+        }	
+			}
+			break;
     case F_SZ_SZ:
       {
         const char * parameter;
@@ -114,7 +167,7 @@ Atom* call_c_func(Atom* fun){
           error = RUNTIME_ERR_NO_FREE_ATOMS;
         }
         else{
-          ret_val->type = NUMBER;
+          //ret_val->type = NUMBER;
           printf("call_c_func of: %s (type N_N_N)\n", fun->label);
           fun->c_func_n_n_n(fun->children[0]->int32_value,
                             fun->children[1]->int32_value,
@@ -123,6 +176,23 @@ Atom* call_c_func(Atom* fun){
         }
       }
       break;
+		case F_SZ_N_N_N:
+			{
+				ret_val = allocate_atom(STRING);
+        if(ret_val == NULL){
+          error = RUNTIME_ERR_NO_FREE_ATOMS;
+        }
+        else{
+          //ret_val->type = STRING;
+          printf("call_c_func of: %s (type SZ_N_N_N)\n", fun->label);
+          fun->c_func_sz_n_n_n(fun->children[0]->int32_value,
+                            fun->children[1]->int32_value,
+														fun->children[2]->int32_value,
+                            ret_val->sz_value, sizeof(ret_val->sz_value));
+          ret_val = reallocate_atom(ret_val);
+        }
+			}
+			break;
     default:
       error = RUNTIME_ERR_NOT_IMPLEMENTED;
       break;

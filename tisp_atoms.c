@@ -3,11 +3,6 @@
 #include <stdio.h>
 
 
-#ifndef DEBUG
-#define printf(a, ...) (void)0
-#endif
-
-
 static Atom ATOMS[MAX_TREE_ELEMENTS];
 static size_t available_atoms = 0;
 

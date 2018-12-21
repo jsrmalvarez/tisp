@@ -3,7 +3,9 @@
 
 #include "tisp_interpreter.h"
 
+#ifndef COMPILE_TIME_ASSERT	
 #define COMPILE_TIME_ASSERT(condition) (void)(sizeof(char[1-2*!!(condition)]))
+#endif	
 
 typedef enum{
   RUNTIME_ERR_NO_ERR,

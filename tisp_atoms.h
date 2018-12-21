@@ -19,9 +19,10 @@ typedef enum{
 typedef enum{
   F_UNKNOWN,
   F_UNDEFINED,
+	F_SZ,
   F_SZ_SZ,
   F_N_N_N,
-  F_SZ
+	F_SZ_N_N_N
 }FunctionType;
 
 typedef struct Atom{
@@ -35,8 +36,10 @@ typedef struct Atom{
       FunctionType c_func_type;
       char label[MAX_FUN_LABEL_STR_SIZE];
       union{
+				void(*c_func_sz)(char* ret, size_t ret_size);
         void(*c_func_sz_sz)(const char* op1, char* ret, size_t ret_size);
         void(*c_func_n_n_n)(int32_t op1, int32_t op2, int32_t* ret);
+				void(*c_func_sz_n_n_n)(int32_t op1, int32_t op2, int32_t op3, char* ret, size_t ret_size);
         //int32_t(*c_func_2)(int32_t op1, int32_t op2);
         //const char*(*c_func_3)(int32_t op1, int32_t op2);
         //const char*(*c_func_4)(const char* op1, const char* op2);
@@ -50,6 +53,7 @@ typedef struct Atom{
 
 }Atom;
 
+typedef void(*c_func_t)(void);
 
 void init_atoms();
 Atom* allocate_atom(AtomType type);
