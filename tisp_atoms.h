@@ -1,11 +1,11 @@
 #ifndef _TISP_ATOMS_H_
 #define _TISP_ATOMS_H_
-
+#include "tisp_config.h"
+	
 #include <stdint.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include "tisp_config.h"
 
 typedef enum{
   PRE_FREE_ATOMS=0,
@@ -22,7 +22,8 @@ typedef enum{
 	F_SZ,
   F_SZ_SZ,
   F_N_N_N,
-	F_SZ_N_N_N
+	F_SZ_N_N_N,
+	F_SZ_N
 }FunctionType;
 
 typedef struct Atom{
@@ -40,6 +41,7 @@ typedef struct Atom{
         void(*c_func_sz_sz)(const char* op1, char* ret, size_t ret_size);
         void(*c_func_n_n_n)(int32_t op1, int32_t op2, int32_t* ret);
 				void(*c_func_sz_n_n_n)(int32_t op1, int32_t op2, int32_t op3, char* ret, size_t ret_size);
+				void(*c_func_sz_n)(int32_t op1, char* ret, size_t ret_size);
         //int32_t(*c_func_2)(int32_t op1, int32_t op2);
         //const char*(*c_func_3)(int32_t op1, int32_t op2);
         //const char*(*c_func_4)(const char* op1, const char* op2);
@@ -52,6 +54,11 @@ typedef struct Atom{
   uint8_t ref_count;
 
 }Atom;
+
+
+Atom ATOMS[MAX_TREE_ELEMENTS];
+size_t available_atoms;
+
 
 typedef void(*c_func_t)(void);
 
