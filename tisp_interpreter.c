@@ -5,7 +5,7 @@
 #include <errno.h>
 #include <ctype.h>
 #include "tisp_atoms.h"
-#include "tisp_impl.h"
+#include "tisp_base_impl.h"
 #ifdef DEBUG
 #include <stdio.h>
 #endif
@@ -90,7 +90,7 @@ bool process_atom(Atom* new_atom){
         // Not whole root
         // Insert first_on_list node on parent's children list
         tree_parent->num_children++;
-        //printf("child %ld\n", tree_parent->last_children_index);
+        //SPAM(("child %ld\n", tree_parent->last_children_index));
         if(tree_parent->num_children > MAX_FUN_PARAMS){
           error |= SYNTAX_ERR_TOO_MUCH_PARAMS;
           is_first_on_list = false;
@@ -101,7 +101,7 @@ bool process_atom(Atom* new_atom){
       }
 
       tree_parent_count++;
-      //printf("root %ld\n", last_tree_parent_index);
+      //SPAM(("root %ld\n", last_tree_parent_index));
       if(tree_parent_count > MAX_FUN_RECURSION){
         error |= SYNTAX_ERR_TOO_MUCH_RECURSION;
         is_first_on_list = false;
@@ -118,7 +118,7 @@ bool process_atom(Atom* new_atom){
       }
       else{
         tree_parent->num_children++;
-        //printf("child %ld\n", tree_parent->last_children_index);
+        //SPAM(("child %ld\n", tree_parent->last_children_index));
         if(tree_parent->num_children > MAX_FUN_PARAMS){
           error |= SYNTAX_ERR_TOO_MUCH_PARAMS;
           is_first_on_list = false;
@@ -167,7 +167,7 @@ Atom* tisp_interpreter_read_str(const char* str){
     process_atom(new_atom); \
   }
 
-  printf("ORIGINAL INPUT:\n>>%s<<\n", str);
+  SPAM(("ORIGINAL INPUT:\n>>%s<<\n", str));
 
   while(*pc != 0){
     char c = *pc;
@@ -233,7 +233,7 @@ Atom* tisp_interpreter_read_str(const char* str){
   if(error == SYNTAX_ERR_NO_ERROR){
     Atom* root = tree_parents[0];
     if(root != NULL){
-      printf("\nAST:\n");
+      SPAM(("\nAST:\n"));
       print_ast(root, 0);
     }
 

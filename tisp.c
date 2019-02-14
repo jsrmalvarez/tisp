@@ -1,8 +1,8 @@
 #include "tisp_interpreter.h"
 #include "tisp.h"
-//#include "tisp_impl.h"
 #include <stdio.h>
 #include <string.h>
+#include <inttypes.h>
 
 #if (MAX_FUN_LABEL_STR_SIZE > MAX_ATOM_STR_SIZE)
 #error MAX_FUN_LABEL_STR_SIZE > MAX_ATOM_STR_SIZE
@@ -152,7 +152,7 @@ Atom* call_c_func(Atom* fun){
           error = RUNTIME_ERR_NO_FREE_ATOMS;
         }
         else{
-          printf("call_c_func of: %s (type SZ)\n", fun->label);
+          SPAM(("call_c_func of: %s (type SZ)\n", fun->label));
           fun->c_func_sz(ret_val->sz_value, sizeof(ret_val->sz_value));
           ret_val = reallocate_atom(ret_val);
         }	
@@ -165,7 +165,7 @@ Atom* call_c_func(Atom* fun){
         if(fun->children[0]->type == NUMBER){
           if(fun->children[0]->sz_value[0] == 0){
             // Conversion never made
-            sprintf(fun->children[0]->sz_value, "%d", fun->children[0]->int32_value);
+            sprintf(fun->children[0]->sz_value, "%"PRIi32"", fun->children[0]->int32_value);
           }
         }
 
@@ -175,7 +175,7 @@ Atom* call_c_func(Atom* fun){
           error = RUNTIME_ERR_NO_FREE_ATOMS;
         }
         else{
-          printf("call_c_func of: %s (type SZ_SZ)\n", fun->label);
+          SPAM(("call_c_func of: %s (type SZ_SZ)\n", fun->label));
           fun->c_func_sz_sz(parameter, ret_val->sz_value, sizeof(ret_val->sz_value));
           ret_val = reallocate_atom(ret_val);
         }
@@ -189,7 +189,7 @@ Atom* call_c_func(Atom* fun){
         }
         else{
           //ret_val->type = NUMBER;
-          printf("call_c_func of: %s (type N_N_N)\n", fun->label);
+          SPAM(("call_c_func of: %s (type N_N_N)\n", fun->label));
           fun->c_func_n_n_n(fun->children[0]->int32_value,
                             fun->children[1]->int32_value,
                             &ret_val->int32_value);
@@ -205,7 +205,7 @@ Atom* call_c_func(Atom* fun){
         }
         else{
           //ret_val->type = STRING;
-          printf("call_c_func of: %s (type SZ_N_N_N)\n", fun->label);
+          SPAM(("call_c_func of: %s (type SZ_N_N_N)\n", fun->label));
           fun->c_func_sz_n_n_n(fun->children[0]->int32_value,
                             fun->children[1]->int32_value,
 														fun->children[2]->int32_value,
@@ -222,7 +222,7 @@ Atom* call_c_func(Atom* fun){
         }
         else{
           //ret_val->type = STRING;
-          printf("call_c_func of: %s (type SZ_N)\n", fun->label);
+          SPAM(("call_c_func of: %s (type SZ_N)\n", fun->label));
           fun->c_func_sz_n(fun->children[0]->int32_value,                            
                             ret_val->sz_value, sizeof(ret_val->sz_value));
           ret_val = reallocate_atom(ret_val);
@@ -246,7 +246,7 @@ Atom* tisp_eval(Atom* input){
   switch(input->type){
     case FUNCTION:
       #ifdef DEBUG
-      printf("NAME:%s, TYPE:FUNCTION\n", input->label);
+      SPAM(("NAME:%s, TYPE:FUNCTION\n", input->label));
       #endif
 
       if(input->c_func_type == F_UNKNOWN){
@@ -254,13 +254,13 @@ Atom* tisp_eval(Atom* input){
         // Try to identify the function
         input->c_func_type = get_f_type(input->label);
         if(input->c_func_type == F_UNDEFINED){
-          error = RUNTIME_ERR_UNKNOWN_FUN;
+          error = RUNTIME_ERR_UNKNOWN_FUN;					
           ret_val = NULL;
           break;
         }
         else{
           check_param_number(input);
-          if(error != RUNTIME_ERR_NO_ERR){
+          if(error != RUNTIME_ERR_NO_ERR){						
             ret_val = NULL;
             break;
           }
@@ -279,7 +279,7 @@ Atom* tisp_eval(Atom* input){
           // FUNCTIONS eventually evaluate to STRING or NUMBER
           // Substitute FUNCTION child for its result atom
           // and discard FUNCTION child;
-          printf("-- PRE SUBSTITUTE\n");
+          SPAM(("-- PRE SUBSTITUTE\n"));
           print_ast(input, 0);
 
           Atom* evaluated_function_child = input->children[n];
@@ -288,7 +288,7 @@ Atom* tisp_eval(Atom* input){
           evaluated_function_child->ref_count--;
           free_atom(evaluated_function_child);
 
-          printf("-- POST SUBSTITUTE\n");
+          SPAM(("-- POST SUBSTITUTE\n"));
           print_ast(input, 0);
         }
       }

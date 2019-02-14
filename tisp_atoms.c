@@ -1,10 +1,7 @@
 #include "tisp_atoms.h"
 #include <string.h>
 #include <stdio.h>
-
-
-static Atom ATOMS[MAX_TREE_ELEMENTS];
-static size_t available_atoms = 0;
+#include <inttypes.h>
 
 void init_atom(Atom* atom){  
   memset(atom, 0, sizeof(Atom));
@@ -21,13 +18,14 @@ void init_atoms(){
 
 #ifdef DEBUG
 void print_atom_stats(){
-  printf("Available atoms: %ld / %lu\n", available_atoms, sizeof(ATOMS)/sizeof(ATOMS[0]));
+  SPAM(("Available atoms: %ld / %lu\n", available_atoms, sizeof(ATOMS)/sizeof(ATOMS[0])));
 }
 #endif
 
 Atom* allocate_atom(AtomType type){
   static bool atoms_initialized = false;
   if(!atoms_initialized){
+		available_atoms = 0;
     init_atoms();
     atoms_initialized = true;
   }
@@ -66,7 +64,7 @@ Atom* reallocate_atom(Atom* atom){
           if(atom->ref_count == 0 && ret_val->ref_count < UINT8_MAX){
             free_atom(atom);
             ret_val = &ATOMS[n];
-            printf("Found equivalent STRING atom! Reallocated. Saved 1 atom in memory.\n");
+            SPAM(("Found equivalent STRING atom! Reallocated. Saved 1 atom in memory.\n"));
             break;
           }
         }
@@ -78,7 +76,7 @@ Atom* reallocate_atom(Atom* atom){
           if(atom->ref_count == 0 && ret_val->ref_count < UINT8_MAX){
             free_atom(atom);
             ret_val = &ATOMS[n];
-            printf("Found equivalent NUMBER atom! Reallocated. Saved 1 atom in memory.\n");
+            SPAM(("Found equivalent NUMBER atom! Reallocated. Saved 1 atom in memory.\n"));
             break;
           }
         }
@@ -101,7 +99,7 @@ void free_atom(Atom* atom){
       }
     }
 #ifdef DEBUG    
-    printf("free_atom(%s) 0x%08lX: ", str, (uintptr_t)atom);
+    SPAM(("free_atom(%s) 0x%08lX: ", str, (uintptr_t)atom));
 #endif    
     init_atom(atom);
     atom->type = FREE;
@@ -110,10 +108,10 @@ void free_atom(Atom* atom){
   else{
 #ifdef DEBUG    
     if(atom->type == FREE){
-      printf("free_atom(%s) 0x%08lX ALREADY FREE ", str, (uintptr_t)atom);
+      SPAM(("free_atom(%s) 0x%08lX ALREADY FREE ", str, (uintptr_t)atom));
     }
     else if(atom->ref_count != 0){
-      printf("free_atom(%s) 0x%08lX REMAINING REFS ref_count: %u ", str, (uintptr_t)atom, atom->ref_count);
+      SPAM(("free_atom(%s) 0x%08lX REMAINING REFS ref_count: %u ", str, (uintptr_t)atom, atom->ref_count));
     }
 #endif    
   }
@@ -134,7 +132,7 @@ void tisp_tostring(Atom* atom, char* str){
       sprintf(str, "%s", atom->sz_value);
       break;
     case NUMBER:
-      sprintf(str, "%d", atom->int32_value);
+      sprintf(str, "%"PRIi32"", atom->int32_value);
       break;
     case FUNCTION:
       sprintf(str, "(%s)", atom->label);
@@ -147,7 +145,7 @@ void print_atoms_from_to(size_t from, size_t to){
   for(size_t n = from; n < to; n++){
     char str[MAX_ATOM_STR_SIZE];
     tisp_tostring(&ATOMS[n], str);
-    printf("ATOMS[%03lu] 0x%08lX (%03u): %s\n", n, (uintptr_t)&ATOMS[n], ATOMS[n].ref_count, str);
+    SPAM(("ATOMS[%03lu] 0x%08lX (%03u): %s\n", n, (uintptr_t)&ATOMS[n], ATOMS[n].ref_count, str));
   }
 }
 #endif
@@ -157,13 +155,13 @@ void indent_print(const char* str, size_t indent_level){
 
   const char* pc = str;
   for(size_t n = 0; n < indent_level; n++){
-    printf(" ");
+    SPAM((" "));
   }
   while(*pc != 0){
-    printf("%c", *pc);
+    SPAM(("%c", *pc));
     if(*pc == '\n' && *(pc+1) != 0){
       for(size_t n = 0; n < indent_level; n++){
-        printf(" ");
+        SPAM((" "));
       }
     }
     pc++;
@@ -176,8 +174,8 @@ void print_atom(Atom* atom, size_t indent_level){
   indent_print(" ", indent_level);
   char str[MAX_ATOM_STR_SIZE];
   tisp_tostring(atom, str);
-  printf("%s", str);
-  printf(" : 0x%08lX ref_count: %u\n", (uintptr_t)atom, atom->ref_count);
+  SPAM(("%s", str));
+  SPAM((" : 0x%08lX ref_count: %u\n", (uintptr_t)atom, atom->ref_count));
 }
 #endif
 
