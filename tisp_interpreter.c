@@ -85,7 +85,22 @@ bool process_atom(Atom* new_atom){
   if(!error){
     if(is_first_on_list){
 
-      Atom* tree_parent = tree_parents[tree_parent_count - 1];
+      Atom* tree_parent = NULL;
+			
+      if(tree_parent_count > 0){
+        if(tree_parent_count - 1 < sizeof(tree_parents)){
+          tree_parent = tree_parents[tree_parent_count - 1];	
+        }
+        else{
+          // Never should reach this point!
+          // The SYNTAX_ERR_TOO_MUCH_RECURSION check below should
+          // return before this point, in a previous recursion.
+          error |= SYNTAX_ERR_TOO_MUCH_RECURSION;
+          is_first_on_list = false;
+          return false;
+        }
+      }
+				
       if(tree_parent != NULL){
         // Not whole root
         // Insert first_on_list node on parent's children list
