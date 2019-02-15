@@ -23,6 +23,7 @@ Atom* parse_atom(const char* atom_start, const char* atom_end, bool is_function)
     size_t atom_size = atom_end - atom_start;
     if(atom_size + 1 > MAX_ATOM_STR_SIZE){
       error |= SYNTAX_ERR_ATOM_LABEL_TOO_LONG;
+			free_atom(ret_val);
       return NULL;
     }
     
@@ -175,7 +176,9 @@ Atom* tisp_interpreter_read_str(const char* str){
   atom_end   = pc; \
   Atom* new_atom = parse_atom(atom_start, atom_end, is_first_on_list); \
   if(new_atom == NULL){ \
-    error |= SYNTAX_ERR_TOO_MUCH_ATOMS; \
+		if(error != SYNTAX_ERR_ATOM_LABEL_TOO_LONG){ \
+    	error |= SYNTAX_ERR_TOO_MUCH_ATOMS; \
+		} \
   } \
   else{ \
     print_atom(new_atom, list_level); \
@@ -201,8 +204,12 @@ Atom* tisp_interpreter_read_str(const char* str){
     }
     else if(c == ')'){
       if(reading_atom){
-        TISP_MARK_ATOM_END();
-      }
+        TISP_MARK_ATOM_END();				
+				if(error != SYNTAX_ERR_NO_ERROR){
+					break;
+				}
+      }			
+			
       if(list_level == 0){
         error |= SYNTAX_ERR_UNBALANCED_PARENTHESES;
       }
@@ -223,6 +230,9 @@ Atom* tisp_interpreter_read_str(const char* str){
       else{
         if(reading_atom){
           TISP_MARK_ATOM_END();
+					if(error != SYNTAX_ERR_NO_ERROR){
+						break;
+					}
         }
       }
     }
@@ -255,6 +265,10 @@ Atom* tisp_interpreter_read_str(const char* str){
     return root;
   }
   else{
+		/*for(size_t p = 0; p < tree_parent_count; p++){
+			free_atom(tree_parents[p]);
+		}*/
+		init_atoms();
     return NULL;
   }
 
