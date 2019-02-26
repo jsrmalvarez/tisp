@@ -1,6 +1,7 @@
 #ifndef _TISP_ATOMS_H_
 #define _TISP_ATOMS_H_
-#include "tisp_config.h"
+
+#include "tisp_defs.h"
 	
 #include <stdint.h>
 #include <stddef.h>
