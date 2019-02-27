@@ -5,7 +5,7 @@
 #include <errno.h>
 #include <ctype.h>
 #include "tisp_atoms.h"
-#include "tisp_base_impl.h"
+
 #ifdef DEBUG
 #include <stdio.h>
 #endif
